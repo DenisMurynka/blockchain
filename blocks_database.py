@@ -5,7 +5,7 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 
 ###
-engine = create_engine('sqlite:///telegrambotDB.db', echo = True)
+engine = create_engine('sqlite:///BlocksDB.db', echo = True)
 
 ###
 Base = declarative_base()
@@ -16,48 +16,47 @@ Base = declarative_base()
 
 class Blocks(Base):
 
-    __tablename__ = 'users'
+    __tablename__ = 'blocks'
 
     id          = Column(Integer, primary_key=True)
     data        = Column(String(250))
     hash        = Column(String(90))
     prevHash    = Column(String(90))
-    blockNo = Column(Integer)
+    blockNo      = Column(Integer)
     timestamp   = Column(DateTime)
 
     def __init__(self, blockNo, data, hash, prevHash,timestamp):
         self.blockNo =blockNo
         self.data = data
-
         self.hash = hash
         self.prevHash = prevHash
         self.timestamp = timestamp
 
 
     def __repr__(self):
-        return "<Users('%s', '%s','%s')>" % (self.name, self.lastname, self.username)
+        return "<Blocks('%s', '%s','%s','%s',','%s')>" % (self.blockNo, self.data, str(self.hash),self.prevHash,self.timestamp)
 
 
-class Using(Base):
-    __tablename__ = 'using'
+# class Using(Base):
+#     __tablename__ = 'using'
+#
+#     id          = Column(Integer, primary_key=True)
+#     name        = Column(String(50))
+#     lastname    = Column(String(50))
+#     username    = Column(String(50))
+#     songname = Column(String(50))
+#     date     = Column(DateTime)
+#
+#     def __init__(self, name, lastname, username,songname, date):
+#         self.name = name
+#         self.lastname = lastname
+#         self.username = username
+#         self.songname = songname
+#         self.date = date
+#
+#     def __repr__(self):
+#         return "<Users('%s', '%s','%s','%s')>" % (self.name, self.lastname, self.username,self.date)
 
-    id          = Column(Integer, primary_key=True)
-    name        = Column(String(50))
-    lastname    = Column(String(50))
-    username    = Column(String(50))
-    songname = Column(String(50))
-    date     = Column(DateTime)
-
-    def __init__(self, name, lastname, username,songname, date):
-        self.name = name
-        self.lastname = lastname
-        self.username = username
-        self.songname = songname
-        self.date = date
-
-    def __repr__(self):
-        return "<Users('%s', '%s','%s','%s')>" % (self.name, self.lastname, self.username,self.date)
 
 
-
-#meta.create_all(engine) #run once time
+#Base.metadata.create_all(engine) #run once time
