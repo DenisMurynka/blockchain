@@ -8,7 +8,9 @@ session = Session()
 class Block:
     # c = session.query(Blocks).order_by(Blocks.id.desc()).limit(2)     #hot ot get last one row in db
     # c = c[::-1]
+    dbObj = Blocks
 
+    blockNoo = dbObj.last_id
     blockNo = 0
     data = None
     next = None
@@ -21,6 +23,7 @@ class Block:
         self.data = data
 
     def hash(self):
+       # print("Number of BLOCK    "+ str(self.blockNoo))
         h = hashlib.sha256()
         h.update(
         str(self.nonce).encode('utf-8') +
@@ -42,7 +45,7 @@ class Blockchain:
 
 
     #blockDb = Blocks()
-    diff = 20
+    diff = 10
     maxNonce = 2 ** 32
     target = 2 ** (256 - diff)
     block = Block("Genesis")
@@ -66,22 +69,12 @@ class Blockchain:
                     Blocks(
                         blockNo=str(block.blockNo),
                         data=str(block.data),
-                        hash = str(block.hash()) ,
+                        hash = str( block.hash()) ,
                         prevHash=str(block.previous_hash).encode('utf-8'),
                         timestamp=block.timestamp
                     )
                 )
-
-                # session.add(
-                #    # Blocks(
-                #         str(block.blockNo),
-                #         str(block.data),
-                #         str(block.hash()),
-                #         str(block.previous_hash).encode('utf-8'),
-                #         block.timestamp
-                #    # )
-                # )
-
+                session.commit()
                 break
             else:
                 block.nonce += 1
@@ -89,10 +82,11 @@ class Blockchain:
 blockchain = Blockchain()
 
 for n in range(10):
-    blockchain.mine(Block(Block("Block " + str(n+1))))
+    #blockchain.mine(Block(Block("Block " + str(n+1)))) select * from blocks where  blocks.id between 5 and 95
+    blockchain.mine(Block("Block " + str(n + 1)))
 
 while blockchain.head != None:
-    print(blockchain.head)
+    #print(blockchain.head)
     blockchain.head = blockchain.head.next
 
-    session.commit()
+

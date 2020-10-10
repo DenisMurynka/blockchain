@@ -32,7 +32,8 @@ class Blocks(Base):
         self.prevHash = prevHash
         self.timestamp = timestamp
 
-
+    def last_id(self):
+        return self.id
     def __repr__(self):
         return "<Blocks('%s', '%s','%s','%s',','%s')>" % (self.blockNo, self.data, str(self.hash),self.prevHash,self.timestamp)
 
