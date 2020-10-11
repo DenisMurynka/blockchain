@@ -10,13 +10,14 @@ class Block:
     # c = c[::-1]
     dbObj = Blocks
 
-    blockNoo = dbObj.last_id
-    blockNo = 0
+
+    blockNo = (session.query(Blocks.blockNo).order_by(Blocks.id.desc()).first())[0]
     data = None
     next = None
     hash = None
     nonce = 0
-    previous_hash = 0x0
+    #previous_hash = 0x0
+    previous_hash = (session.query(Blocks.prevHash).order_by(Blocks.id.desc()).first())[0]
     timestamp = datetime.datetime.now()
 
     def __init__(self, data):
@@ -37,7 +38,11 @@ class Block:
 
     def __str__(self):
        # print("NEEDED ro2" + str(self.c)+'\n')
-        return "Block Hash: " + str(self.hash()) + "\nBlockNo: " + str(self.blockNo) + "\nBlock Data: " + str(self.data) + "\nHashes: " + str(self.nonce) + "\n--------------"
+        return "Block Hash: " + str(self.hash()) + \
+               "\nBlockNo: " + str(self.blockNo) + \
+               "\nBlock Data: " + str(self.data) + \
+               "\nHashes: " + str(self.nonce) + \
+               "\n--------------"
 
 
 class Blockchain:
@@ -83,10 +88,12 @@ blockchain = Blockchain()
 
 for n in range(10):
     #blockchain.mine(Block(Block("Block " + str(n+1)))) select * from blocks where  blocks.id between 5 and 95
-    blockchain.mine(Block("Block " + str(n + 1)))
-
+    blockchain.mine(Block("Block " + str((session.query(Blocks.blockNo).order_by(Blocks.id.desc()).first())[0])))
+    #blockchain.mine(Block("Block " + str(n+1)))
 while blockchain.head != None:
     #print(blockchain.head)
     blockchain.head = blockchain.head.next
 
+#obj = session.query(Blocks.blockNo).order_by(Blocks.id.desc()).first()
 
+#print((session.query(Blocks.blockNo).order_by(Blocks.id.desc()).first())[0])
