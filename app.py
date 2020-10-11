@@ -47,8 +47,6 @@ class Block:
 
 class Blockchain:
 
-
-
     #blockDb = Blocks()
     diff = 10
     maxNonce = 2 ** 32
