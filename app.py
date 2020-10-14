@@ -8,7 +8,7 @@ session = Session()
 class Block:
     # c = session.query(Blocks).order_by(Blocks.id.desc()).limit(2)     #hot ot get last one row in db
     # c = c[::-1]
-    dbObj = Blocks
+    #dbObj = Blocks
 
 
     blockNo = (session.query(Blocks.blockNo).order_by(Blocks.id.desc()).first())[0]
@@ -24,7 +24,7 @@ class Block:
         self.data = data
 
     def hash(self):
-       # print("Number of BLOCK    "+ str(self.blockNoo))
+
         h = hashlib.sha256()
         h.update(
         str(self.nonce).encode('utf-8') +
@@ -37,7 +37,7 @@ class Block:
 
 
     def __str__(self):
-       # print("NEEDED ro2" + str(self.c)+'\n')
+
         return "Block Hash: " + str(self.hash()) + \
                "\nBlockNo: " + str(self.blockNo) + \
                "\nBlock Data: " + str(self.data) + \
@@ -51,6 +51,7 @@ class Blockchain:
     diff = 10
     maxNonce = 2 ** 32
     target = 2 ** (256 - diff)
+
     block = Block("Genesis")
     dummy = head = block
 
@@ -85,9 +86,10 @@ class Blockchain:
 blockchain = Blockchain()
 
 for n in range(10):
-    #blockchain.mine(Block(Block("Block " + str(n+1)))) select * from blocks where  blocks.id between 5 and 95
-    blockchain.mine(Block("Block " + str((session.query(Blocks.blockNo).order_by(Blocks.id.desc()).first())[0])))
+    blockchain.mine(Block(Block("Block " + str(n+1)))) #select * from blocks where  blocks.id between 5 and 95
+    #blockchain.mine(Block("Block " + str((session.query(Blocks.blockNo).order_by(Blocks.id.desc()).first())[0])))
     #blockchain.mine(Block("Block " + str(n+1)))
+
 while blockchain.head != None:
     #print(blockchain.head)
     blockchain.head = blockchain.head.next
