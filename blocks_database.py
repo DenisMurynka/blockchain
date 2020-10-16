@@ -5,7 +5,7 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 
 ###
-engine = create_engine('sqlite:///BlocksDB.db', echo = True)
+engine = create_engine('sqlite:///BlocksDB.db') # add , echo = True for the logging
 
 ###
 Base = declarative_base()

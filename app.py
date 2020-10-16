@@ -1,10 +1,17 @@
 import datetime
 import hashlib
 from blocks_database import Blocks, engine, sessionmaker
+import logging
 
 Session = sessionmaker(bind=engine)
 session = Session()
 
+
+
+logging.basicConfig(filename='logging.log',
+                    filemode='w',
+                    format='%(name)s - %(levelname)s - %(message)s')
+log = logging.getLogger("ex")
 class Block:
     # c = session.query(Blocks).order_by(Blocks.id.desc()).limit(2)     #hot ot get last one row in db
     # c = c[::-1]
@@ -15,6 +22,8 @@ class Block:
     data = None
     next = None
     hash = None
+
+
     nonce = 0
     #previous_hash = 0x0
     previous_hash = (session.query(Blocks.prevHash).order_by(Blocks.id.desc()).first())[0]
@@ -22,6 +31,9 @@ class Block:
 
     def __init__(self, data):
         self.data = data
+        # self.hashh = self.hash()
+        # print("HASHH  "+str(self.hashh))
+
 
     def hash(self):
 
@@ -33,6 +45,7 @@ class Block:
         str(self.timestamp).encode('utf-8') +
         str(self.blockNo).encode('utf-8')
         )
+
         return h.hexdigest()
 
 
@@ -63,18 +76,23 @@ class Blockchain:
         self.block.next = block
         self.block = self.block.next
 
+
+
     # def valid_check(self):
-    #     last_block = []
-    #     if self.block.previous_hash != self.block.hash:
-    #         return  False
-    #     if not
+    #
+    #     #if self.block.previous_hash != self.block.hash:
+    #       #  return  False
+    #     if self.block.hash == self.block.hash():
+    #         print("False")
 
 
     def mine(self, block):
         for n in range(self.maxNonce):
             if int(block.hash(), 16) <= self.target:
                 self.add(block)
+                #print("Prev Hash:" + str(block.previous_hash))
                 print(block)
+
 
                 session.add(
                     Blocks(
@@ -87,21 +105,32 @@ class Blockchain:
                     )
                 )
                 session.commit()
+
                 break
             else:
                 block.nonce += 1
 
 blockchain = Blockchain()
 
-for n in range(10):
 
-    #blockchain.mine(Block(Block("Block " + str((session.query(Blocks.blockNo).order_by(Blocks.id.desc()).first())[0]))))
-    #blockchain.mine(Block(Block("some data")))
-    blockchain.mine(Block("some data"))
+if __name__ == '__main__':
 
-while blockchain.head != None:
-    #print(blockchain.head)
-    blockchain.head = blockchain.head.next
+    try :
+        for n in range(10):
+
+            #blockchain.mine(Block(Block("Block " + str((session.query(Blocks.blockNo).order_by(Blocks.id.desc()).first())[0]))))
+            #blockchain.mine(Block(Block("some data")))
+            blockchain.mine(Block("some data"))
+
+        while blockchain.head != None:
+            #print(blockchain.head)
+            blockchain.head = blockchain.head.next
+    except Exception as e:
+        logging.exception("Exception occurred")
+        log.exception(e)
+
+
+
 
 #obj = session.query(Blocks.blockNo).order_by(Blocks.id.desc()).first()
 
