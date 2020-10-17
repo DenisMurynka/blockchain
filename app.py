@@ -6,12 +6,16 @@ import logging
 Session = sessionmaker(bind=engine)
 session = Session()
 
-
-
-logging.basicConfig(filename='logging.log',
+logging.basicConfig(filename='sqlalchemyLogging.log',
                     filemode='w',
                     format='%(name)s - %(levelname)s - %(message)s')
-log = logging.getLogger("ex")
+logSQLA = logging.getLogger("sex")
+logging.basicConfig(filename='logging.log',
+                    filemode='a',
+                    format='%(name)s - %(levelname)s - %(message)s')
+#log = logging.getLogger("ex")
+
+
 class Block:
     # c = session.query(Blocks).order_by(Blocks.id.desc()).limit(2)     #hot ot get last one row in db
     # c = c[::-1]
@@ -106,6 +110,8 @@ class Blockchain:
                 )
                 session.commit()
 
+                #logging.exception("Exception occurred")
+                logSQLA.exception(block)
                 break
             else:
                 block.nonce += 1
@@ -127,7 +133,7 @@ if __name__ == '__main__':
             blockchain.head = blockchain.head.next
     except Exception as e:
         logging.exception("Exception occurred")
-        log.exception(e)
+        #log.exception(e)
 
 
 
