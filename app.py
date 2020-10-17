@@ -9,11 +9,8 @@ session = Session()
 logging.basicConfig(filename='sqlalchemyLogging.log',
                     filemode='w',
                     format='%(name)s - %(levelname)s - %(message)s')
-logSQLA = logging.getLogger("sex")
-logging.basicConfig(filename='logging.log',
-                    filemode='a',
-                    format='%(name)s - %(levelname)s - %(message)s')
-#log = logging.getLogger("ex")
+
+log = logging.getLogger("ex")
 
 
 class Block:
@@ -111,7 +108,7 @@ class Blockchain:
                 session.commit()
 
                 #logging.exception("Exception occurred")
-                logSQLA.exception(block)
+                log.exception(block)
                 break
             else:
                 block.nonce += 1
