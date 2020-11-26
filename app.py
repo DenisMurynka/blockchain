@@ -1,140 +1,127 @@
-import datetime
-import hashlib
-from blocks_database import Blocks, engine, sessionmaker
-import logging
-
-Session = sessionmaker(bind=engine)
-session = Session()
-
-logging.basicConfig(filename='sqlalchemyLogging.log',
-                    filemode='w',
-                    format='%(name)s - %(levelname)s - %(message)s')
-
-log = logging.getLogger("ex")
+import sqlite3
+from flask import Flask, request
+from flask_restful import Resource, Api
+from json import dumps, loads
+from flask_jsonpify import jsonpify
+import json
+import requests
 
 
-class Block:
-    # c = session.query(Blocks).order_by(Blocks.id.desc()).limit(2)     #hot ot get last one row in db
-    # c = c[::-1]
-    #dbObj = Blocks
+def call_hash(data):
+    url = 'http://127.0.0.1:8002/hash/'
+    try:
+        del data['hash']
+    except:
+        pass
+    data2={}
+    data2['data']=json.dumps(data)
+    #print data2
+    response = requests.post(url, data=data2, allow_redirects=False)
+    if  response.status_code == 200:
+        return response.json()['hash']
+
+def call_nouce():
+    nouce_url = 'http://127.0.0.1:8001/nouce'
+    response = requests.get(nouce_url)
+    if  response.status_code == 200:
+        return response.json()['nouce']
 
 
-    blockNo = (session.query(Blocks.blockNo).order_by(Blocks.id.desc()).first())[0]
-    data = None
-    next = None
-    hash = None
+def get_pre_hash(cursor):
+    cursor.execute('select * from journal order by id desc limit 1')
+    results = cursor.fetchall()
+    if results:
+        return results[0]['hash']
+    else:
+        return ""
 
 
-    nonce = 0
-    #previous_hash = 0x0
-    previous_hash = (session.query(Blocks.prevHash).order_by(Blocks.id.desc()).first())[0]
-    timestamp = datetime.datetime.now()
-
-    def __init__(self, data):
-        self.data = data
-        # self.hashh = self.hash()
-        # print("HASHH  "+str(self.hashh))
+def database_connect():
+    conn = sqlite3.connect('blockchain.db')
+    conn.row_factory = dict_factory
+    cursor = conn.cursor()
+    return conn, cursor
 
 
-    def hash(self):
+def data_contruct_new(data1):
+    nouce = {"nouce":u""}
+    hash = {"hash":u""}
+    pre_hash =  {"pre_hash":u""}
+    data1.update(nouce)
+    data1.update(hash)
+    data1.update(pre_hash)
+    return data1
 
-        h = hashlib.sha256()
-        h.update(
-        str(self.nonce).encode('utf-8') +
-        str(self.data).encode('utf-8') +
-        str(self.previous_hash).encode('utf-8') +
-        str(self.timestamp).encode('utf-8') +
-        str(self.blockNo).encode('utf-8')
-        )
+def dict_factory(cursor, row):
+    d = {}
+    for idx, col in enumerate(cursor.description):
+        d[col[0]] = row[idx]
+    return d
 
-        return h.hexdigest()
-
-
-    def __str__(self):
-
-        return "Block Hash: " + str(self.hash()) + \
-               "\nBlockNo: " + str(self.blockNo) + \
-               "\nBlock Data: " + str(self.data) + \
-               "\nHashes: " + str(self.nonce) + \
-               "\n--------------"
-
-
-class Blockchain:
-
-
-    diff = 10
-    maxNonce = 2 ** 32
-    target = 2 ** (256 - diff)
-
-    block = Block("Genesis")
-    dummy = head = block
-
-    def add(self, block):
-
-        block.previous_hash = self.block.hash()
-        block.blockNo = self.block.blockNo + 1
-
-        self.block.next = block
-        self.block = self.block.next
+app = Flask(__name__)
 
 
 
-    # def valid_check(self):
-    #
-    #     #if self.block.previous_hash != self.block.hash:
-    #       #  return  False
-    #     if self.block.hash == self.block.hash():
-    #         print("False")
+
+@app.route("/insert", methods = ['GET', 'POST'])
+def insert():
+    if request.method == 'POST':
+        data = request.form['data']
+        data1 = loads(data)
+        conn, cursor = database_connect()
+        try:
+            cursor.execute("insert into journal(journal_id, entry_date, create_time, created_by, post_status, account_code, amount, dr_cr, nouce, hash) values ( ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", [ data1['journal_id'], data1['entry_date'], data1['create_time'], data1['created_by'], data1['post_status'], data1['account_code'], data1['amount'], data1['dr_cr'], data1['nouce'], data1['hash']])
+            conn.commit()
+            return "Success"
+        except:
+            return "Failed"
+        conn.close()
+    else:
+        return ""
 
 
-    def mine(self, block):
-        for n in range(self.maxNonce):
-            if int(block.hash(), 16) <= self.target:
-                self.add(block)
-                #print("Prev Hash:" + str(block.previous_hash))
-                print(block)
-
-
-                session.add(
-                    Blocks(
-
-                        data=str(block.data),
-                        blockNo=str(block.blockNo),
-                        hash = str( block.hash()) ,
-                        prevHash=str(block.previous_hash).encode('utf-8'),
-                        timestamp=block.timestamp
-                    )
-                )
-                session.commit()
-
-                #logging.exception("Exception occurred")
-                log.exception(block)
-                break
+@app.route("/verify", methods = ['GET', 'POST'])
+def verify():
+    if request.method == 'GET':
+        try:
+            id = request.args.get('id', default = 2, type = int)
+            conn, cursor = database_connect()
+            cursor.execute('select * from journal where id <= ? order by id desc limit 2', [id,])
+            results = cursor.fetchall()
+            records_verify = results[0]
+            hash_now = results[0]['hash']
+            pre_hash =  {u"pre_hash":u""}
+            records_verify.update(pre_hash)
+            records_verify['pre_hash'] = results[1]['hash']
+            del records_verify['id']
+            hash_value = call_hash(records_verify)
+            conn.close()
+            if hash_value == hash_now:
+                return "Verified"
             else:
-                block.nonce += 1
-
-blockchain = Blockchain()
-
-
-if __name__ == '__main__':
-
-    try :
-        for n in range(10):
-
-            #blockchain.mine(Block(Block("Block " + str((session.query(Blocks.blockNo).order_by(Blocks.id.desc()).first())[0]))))
-            #blockchain.mine(Block(Block("some data")))
-            blockchain.mine(Block("some data"))
-
-        while blockchain.head != None:
-            #print(blockchain.head)
-            blockchain.head = blockchain.head.next
-    except Exception as e:
-        logging.exception("Exception occurred")
-        #log.exception(e)
+                return "Failed"
+        except:
+            return "Error"
+        conn.close()
+    else:
+        return ""
 
 
+@app.route("/construct", methods = ['GET', 'POST'])
+def construct():
+    if request.method == 'POST':
+        data = request.form['data']
+        data1 = loads(data)
+        conn, cursor = database_connect()
+        data1 = data_contruct_new(data1)
+        data1['pre_hash'] = get_pre_hash(cursor)
+        data1['nouce'] = call_nouce()
+        data1['hash'] = call_hash(data1)
+        conn.close()
+        return jsonpify(data1)
+    else:
+        return ""
 
 
-#obj = session.query(Blocks.blockNo).order_by(Blocks.id.desc()).first()
-
-#print((session.query(Blocks.blockNo).order_by(Blocks.id.desc()).first())[0])
+if __name__ == "__main__":
+    app.run(host='127.0.0.1', port='8000')

@@ -6,6 +6,7 @@ from sqlalchemy.orm import sessionmaker
 
 ###
 engine = create_engine('sqlite:///BlocksDB.db') # add , echo = True for the logging
+engine1 = create_engine('sqlite:///BlocksDB1.db') # add , echo = True for the logging
 
 ###
 Base = declarative_base()
@@ -22,7 +23,7 @@ class Blocks(Base):
     data        = Column(String(250))
     hash        = Column(String(90))
     prevHash    = Column(String(90))
-    blockNo      = Column(Integer)
+    blockNo     = Column(Integer)
     timestamp   = Column(DateTime)
 
     def __init__(self, blockNo, data, hash, prevHash,timestamp):
@@ -40,4 +41,6 @@ class Blocks(Base):
                                                           str(self.hash),
                                                           self.prevHash,
                                                           self.timestamp)
+
+
 
