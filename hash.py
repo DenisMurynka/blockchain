@@ -10,13 +10,13 @@ app = Flask(__name__)
 
 @app.route("/hash/", methods = ['GET', 'POST'])
 def hash():
-  	if request.method == 'POST':
-  		data = request.form['data']
-   		data_sha256 = sha256(dumps(loads(data), sort_keys=True).encode('utf-8')).hexdigest()
-   		hashjson = {'hash': data_sha256}
-   		return jsonpify(hashjson)
-   	else:
-   		return ' '
+	if request.method == 'POST':
+		data = request.form['data']
+		data_sha256 = sha256(dumps(loads(data), sort_keys=True).encode('utf-8')).hexdigest()
+		hashjson = {'hash': data_sha256}
+		return jsonpify(hashjson)
+	else:
+		return ' '
 
 if __name__ == "__main__":
-    app.run(host='127.0.0.1', port='8002')
+	app.run(host='127.0.0.1', port='8002')
