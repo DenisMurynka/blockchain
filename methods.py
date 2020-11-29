@@ -1,13 +1,5 @@
-from uuid import uuid4
-
-import requests
-from flask import Flask, jsonify, request
-
-from blockchain_class import Blockchain
 
 
-# Instantiate the Node
-app = Flask(__name__)
 
 # Generate a globally unique address for this node
 node_identifier = str(uuid4()).replace('-', '')
@@ -67,8 +59,6 @@ def full_chain():
         'chain': blockchain.chain
 
     }
-
-    print(blockchain)
     return jsonify(response), 200
 
 
@@ -106,14 +96,3 @@ def consensus():
         }
 
     return jsonify(response), 200
-
-
-if __name__ == '__main__':
-    from argparse import ArgumentParser
-
-    parser = ArgumentParser()
-    parser.add_argument('-p', '--port', default=5000, type=int, help='port to listen on')
-    args = parser.parse_args()
-    port = args.port
-
-    app.run(host='0.0.0.0', port=port)

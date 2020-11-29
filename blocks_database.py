@@ -18,24 +18,27 @@ class Blocks(Base):
 
     __tablename__ = 'blocks'
 
-    id          = Column(Integer, primary_key=True)
-    data        = Column(String(250))
-    hash        = Column(String(90))
-    prevHash    = Column(String(90))
-    blockNo      = Column(Integer)
-    timestamp   = Column(DateTime)
+    id                  = Column(Integer, primary_key=True)
+    data                = Column(String(250))
+    hash                = Column(String(90))
+    prevHash            = Column(String(90))
+    blockNo             = Column(Integer)
+    transactionNumber   = Column(Integer)
+    timestamp           = Column(DateTime)
 
-    def __init__(self, blockNo, data, hash, prevHash,timestamp):
+    def __init__(self, blockNo, data, hash, prevHash,timestamp,tnumber):
 
         self.data = data
         self.blockNo = blockNo
         self.hash = hash
         self.prevHash = prevHash
         self.timestamp = timestamp
+        self.transactionNumber = tnumber
 
 
     def __repr__(self):
-        return "<Blocks('%s', '%s','%s','%s',','%s')>" % (self.blockNo,
+        return "<Blocks('%s', '%s','%s','%s','%s','%s')>" % (self.blockNo,
+                                                          self.transactionNumber,
                                                           self.data,
                                                           str(self.hash),
                                                           self.prevHash,
