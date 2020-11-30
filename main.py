@@ -1,5 +1,5 @@
 from uuid import uuid4
-from database import Transaction, sessionmaker
+from database import Transaction, sessionmaker, Block
 import datetime
 from flask import Flask, jsonify, request
 from sqlalchemy import create_engine, Column, Integer, String, DateTime
@@ -8,6 +8,8 @@ engine = create_engine('sqlite:///blockchain.db') # add , echo = True for the lo
 Session = sessionmaker(bind=engine)
 session = Session()
 
+Session1 = sessionmaker(bind=engine)
+session1 = Session()
 # Instantiate the Node
 app = Flask(__name__)
 
@@ -43,17 +45,28 @@ def mine():
         'proof': current_block['proof'],
         'previous_hash': current_block['previous_hash'],
     }
+    session1.add(
+        Block(
+            id=(session.query(Block.id).order_by(Block.id.desc()).first())[0]+1,
+            transaction='test',
+            timestamp=currentTime
+
+        )
+    )
     session.add(
         Transaction(
-
+            id=(session.query(Transaction.id).order_by(Transaction.id.desc()).first())[0]+1,
             data="New Block Forged",
             transactionNo= current_block['index'],
             hash=blockchain.hash(current_block),
             prevHash=current_block['previous_hash'],
             timestamp=currentTime,
-            proof=current_block['proof']
+            proof=current_block['proof'],
+            nID_block=3
         )
     )
+
+    #session1.commit()
     session.commit()
     return jsonify(response), 200
 

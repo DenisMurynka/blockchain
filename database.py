@@ -1,7 +1,7 @@
 #from main import app
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy import create_engine, Column, Integer, String, DateTime
+from sqlalchemy import create_engine, Column, Integer, String, DateTime,ForeignKey
 from sqlalchemy.orm import sessionmaker
 
 #app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///blockchain.db'
@@ -11,7 +11,7 @@ from sqlalchemy.orm import sessionmaker
 #
 Base = declarative_base()
 class Transaction(Base):
-    id = Column(Integer,primary_key = True)
+    id = Column(Integer,primary_key = True,autoincrement=True)
     __tablename__ = 'transaction'
 
     data = Column(String(250))
@@ -20,3 +20,13 @@ class Transaction(Base):
     transactionNo = Column(Integer)
     timestamp = Column(DateTime)
     proof = Column(Integer)
+    nID_block = Column(Integer,ForeignKey('block.id'))
+
+
+
+class Block(Base):
+    __tablename__ = 'block'
+
+    id = Column(Integer, primary_key=True,autoincrement=True)
+    transaction = Column(String)
+    timestamp = Column(DateTime)
