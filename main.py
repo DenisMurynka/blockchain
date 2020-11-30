@@ -40,7 +40,8 @@ def mine():
 
     response = {
         'message': "New Block Forged",
-        'index': current_block['index'],
+        #'index': current_block['index'],
+        'index': (session.query(Block.id).order_by(Block.id.desc()).first())[0]+1,
         'transactions': current_block['transactions'],
         'proof': current_block['proof'],
         'previous_hash': current_block['previous_hash'],
@@ -66,7 +67,7 @@ def mine():
         )
     )
 
-    #session1.commit()
+    #session1.commit()    # id does not increase because of there is no id increasing via insert aka commit
     session.commit()
     return jsonify(response), 200
 
@@ -81,9 +82,10 @@ def new_transaction():
         return 'Missing values', 400
 
     # Create a new Transaction
+    #index = blockchain.new_transaction(values['sender'], values['recipient'], values['amount'])
     index = blockchain.new_transaction(values['sender'], values['recipient'], values['amount'])
 
-    response = {'message': f'Transaction will be added to Block {index}'}
+    response = {'message': f'Transaction will be added to Block {(session.query(Block.id).order_by(Block.id.desc()).first())[0]+1}'}
     return jsonify(response), 201
 
 
