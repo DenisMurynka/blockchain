@@ -1,10 +1,12 @@
 from uuid import uuid4
-
-import requests
+from database import Transaction, sessionmaker
+import datetime
 from flask import Flask, jsonify, request
-
+from sqlalchemy import create_engine, Column, Integer, String, DateTime
 from blockchain_class import Blockchain
-
+engine = create_engine('sqlite:///blockchain.db') # add , echo = True for the logging
+Session = sessionmaker(bind=engine)
+session = Session()
 
 # Instantiate the Node
 app = Flask(__name__)
@@ -15,7 +17,7 @@ node_identifier = str(uuid4()).replace('-', '')
 # Instantiate the Blockchain
 blockchain = Blockchain()
 
-
+currentTime = datetime.datetime.now()
 @app.route('/mine', methods=['GET'])
 def mine():
     # We run the proof of work algorithm to get the next proof...
@@ -32,15 +34,27 @@ def mine():
 
     # Forge the new Block by adding it to the chain
     previous_hash = blockchain.hash(last_block)
-    block = blockchain.new_block(proof, previous_hash)
+    current_block = blockchain.new_block(proof, previous_hash)
 
     response = {
         'message': "New Block Forged",
-        'index': block['index'],
-        'transactions': block['transactions'],
-        'proof': block['proof'],
-        'previous_hash': block['previous_hash'],
+        'index': current_block['index'],
+        'transactions': current_block['transactions'],
+        'proof': current_block['proof'],
+        'previous_hash': current_block['previous_hash'],
     }
+    session.add(
+        Transaction(
+
+            data="New Block Forged",
+            transactionNo= current_block['index'],
+            hash=blockchain.hash(current_block),
+            prevHash=current_block['previous_hash'],
+            timestamp=currentTime,
+            proof=current_block['proof']
+        )
+    )
+    session.commit()
     return jsonify(response), 200
 
 
