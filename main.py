@@ -1,4 +1,5 @@
 from uuid import uuid4
+import random               #including this for testing data
 from database import Transaction, sessionmaker, Block
 import datetime
 from flask import Flask, jsonify, request
@@ -31,7 +32,7 @@ def mine():
     blockchain.new_transaction(
         sender="0",
         recipient=node_identifier,
-        amount=1,
+        amount=random.randint(1, 1000000),
     )
 
     # Forge the new Block by adding it to the chain
@@ -49,7 +50,8 @@ def mine():
     session1.add(
         Block(
             id=(session.query(Block.id).order_by(Block.id.desc()).first())[0]+1,
-            transaction=blockchain.hash(current_block),
+            currBlockHash=blockchain.hash(current_block),
+            prevBlockHash=blockchain.hash(last_block),
             timestamp=currentTime
         )
     )
@@ -85,6 +87,23 @@ def new_transaction():
     index = blockchain.new_transaction(values['sender'], values['recipient'], values['amount'])
 
     response = {'message': f'Transaction will be added to Block {index}'}
+
+    session.add(
+        Transaction(
+            id=(session.query(Transaction.id).order_by(Transaction.id.desc()).first())[0]+1,
+            data=values['amount'],
+            transactionNo= (session.query(Transaction.id).order_by(Transaction.id.desc()).first())[0]+1,
+            hash=blockchain.hash(str(values['sender'])+str(values['recipient'])+ str(values['amount'])),
+            prevHash='#####',#how to get prev hash?
+            timestamp=currentTime,
+            #proof=current_block['proof'],
+            nID_block=(session.query(Block.id).order_by(Block.id.desc()).first())[0]+1
+        )
+    )
+
+
+    session.commit()
+
     return jsonify(response), 201
 
 

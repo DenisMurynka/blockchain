@@ -19,7 +19,7 @@ class Transaction(Base):
     prevHash = Column(String(90))
     transactionNo = Column(Integer)
     timestamp = Column(DateTime)
-    proof = Column(Integer)
+    #proof = Column(Integer)
     nID_block = Column(Integer,ForeignKey('block.id'))
 
 
@@ -28,5 +28,6 @@ class Block(Base):
     __tablename__ = 'block'
 
     id = Column(Integer, primary_key=True,autoincrement=True)
-    transaction = Column(String)
+    prevBlockHash = Column(String)
+    currBlockHash = Column(String)
     timestamp = Column(DateTime)
