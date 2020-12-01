@@ -86,7 +86,7 @@ def new_transaction():
     #index = blockchain.new_transaction(values['sender'], values['recipient'], values['amount'])
     index = blockchain.new_transaction(values['sender'], values['recipient'], values['amount'])
 
-    response = {'message': f'Transaction will be added to Block {index}'}
+    response = {'message': f'Transaction will be added to Block {str((session.query(Block.id).order_by(Block.id.desc()).first())[0]+1)}'}
 
     session.add(
         Transaction(
