@@ -49,26 +49,25 @@ def mine():
     session1.add(
         Block(
             id=(session.query(Block.id).order_by(Block.id.desc()).first())[0]+1,
-            transaction='test',
+            transaction=blockchain.hash(current_block),
             timestamp=currentTime
-
         )
     )
-    session.add(
-        Transaction(
-            id=(session.query(Transaction.id).order_by(Transaction.id.desc()).first())[0]+1,
-            data="New Block Forged",
-            transactionNo= current_block['index'],
-            hash=blockchain.hash(current_block),
-            prevHash=current_block['previous_hash'],
-            timestamp=currentTime,
-            proof=current_block['proof'],
-            nID_block=3
-        )
-    )
+    # session.add(
+    #     Transaction(
+    #         id=(session.query(Transaction.id).order_by(Transaction.id.desc()).first())[0]+1,
+    #         data="New Block Forged",
+    #         transactionNo= current_block['index'],
+    #         hash=blockchain.hash(current_block),
+    #         prevHash=current_block['previous_hash'],
+    #         timestamp=currentTime,
+    #         proof=current_block['proof'],
+    #         nID_block=3
+    #     )
+    # )
 
-    #session1.commit()    # id does not increase because of there is no id increasing via insert aka commit
-    session.commit()
+    session1.commit()    # id does not increase because of there is no id increasing via insert aka commit
+    #session.commit()
     return jsonify(response), 200
 
 
@@ -85,7 +84,7 @@ def new_transaction():
     #index = blockchain.new_transaction(values['sender'], values['recipient'], values['amount'])
     index = blockchain.new_transaction(values['sender'], values['recipient'], values['amount'])
 
-    response = {'message': f'Transaction will be added to Block {(session.query(Block.id).order_by(Block.id.desc()).first())[0]+1}'}
+    response = {'message': f'Transaction will be added to Block {index}'}
     return jsonify(response), 201
 
 

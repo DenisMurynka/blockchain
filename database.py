@@ -8,7 +8,7 @@ from sqlalchemy.orm import sessionmaker
 # db = SQLAlchemy(app)
 #
 # #app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-#
+
 Base = declarative_base()
 class Transaction(Base):
     id = Column(Integer,primary_key = True,autoincrement=True)
