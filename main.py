@@ -24,6 +24,7 @@ currentTime = datetime.datetime.now()
 @app.route('/mine', methods=['GET'])
 def mine():
     # We run the proof of work algorithm to get the next proof...
+
     last_block = blockchain.last_block
     proof = blockchain.proof_of_work(last_block)
 
@@ -36,13 +37,15 @@ def mine():
     )
 
     # Forge the new Block by adding it to the chain
+    index = (session.query(Block.id).order_by(Block.id.desc()).first())[0]+1
     previous_hash = blockchain.hash(last_block)
-    current_block = blockchain.new_block(proof, previous_hash)
+    current_block = blockchain.new_block(proof, previous_hash,index)
 
     response = {
         'message': "New Block Forged",
-        #'index': current_block['index'],
-        'index': (session.query(Block.id).order_by(Block.id.desc()).first())[0]+1,
+       # 'index': current_block['index'],
+        'index': index,
+        #'index': (session.query(Block.id).order_by(Block.id.desc()).first())[0]+1,
         'transactions': current_block['transactions'],
         'proof': current_block['proof'],
         'previous_hash': current_block['previous_hash'],

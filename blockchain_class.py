@@ -4,8 +4,12 @@ import datetime
 from time import time
 from urllib.parse import urlparse
 from uuid import uuid4
-
 import requests
+from sqlalchemy import create_engine
+from database import Transaction, sessionmaker, Block
+engine = create_engine('sqlite:///blockchain.db') # add , echo = True for the logging
+Session = sessionmaker(bind=engine)
+session = Session()
 from flask import Flask, jsonify, request
 
 
@@ -16,7 +20,7 @@ class Blockchain:
         self.nodes = set()
 
         # Create the genesis block
-        self.new_block(previous_hash='1', proof=100)
+        self.new_block(previous_hash='1', proof=100,indx = 1)
 
     def register_node(self, address):
         """
@@ -95,7 +99,7 @@ class Blockchain:
 
         return False
 
-    def new_block(self, proof, previous_hash):
+    def new_block(self, proof, previous_hash,indx):
         """
         Create a new Block in the Blockchain
         :param proof: The proof given by the Proof of Work algorithm
@@ -104,7 +108,8 @@ class Blockchain:
         """
 
         block = {
-            'index': len(self.chain) + 1,
+            #'index': len(self.chain) + 1,
+            'index': indx,
             'timestamp': str(datetime.datetime.now()),
             'transactions': self.current_transactions,
             'proof': proof,
