@@ -1,5 +1,6 @@
 from uuid import uuid4
 import random               #including this for testing data
+
 from database import Transaction, sessionmaker, Block
 import datetime
 from flask import Flask, jsonify, request
@@ -30,11 +31,11 @@ def mine():
 
     # We must receive a reward for finding the proof.
     # The sender is "0" to signify that this node has mined a new coin.
-    blockchain.new_transaction(
-        sender="0",
-        recipient=node_identifier,
-        amount=random.randint(1, 1000000),
-    )
+    # blockchain.new_transaction(
+    #     sender=random.randrange(5, 100000000, 1),
+    #     recipient=node_identifier,
+    #     amount=random.randrange(5, 100000000, 1),
+    # )
 
     # Forge the new Block by adding it to the chain
     index = (session.query(Block.id).order_by(Block.id.desc()).first())[0]+1
@@ -58,18 +59,6 @@ def mine():
             timestamp=currentTime
         )
     )
-    # session.add(
-    #     Transaction(
-    #         id=(session.query(Transaction.id).order_by(Transaction.id.desc()).first())[0]+1,
-    #         data="New Block Forged",
-    #         transactionNo= current_block['index'],
-    #         hash=blockchain.hash(current_block),
-    #         prevHash=current_block['previous_hash'],
-    #         timestamp=currentTime,
-    #         proof=current_block['proof'],
-    #         nID_block=3
-    #     )
-    # )
 
     session1.commit()    # id does not increase because of there is no id increasing via insert aka commit
     #session.commit()
@@ -86,17 +75,19 @@ def new_transaction():
         return 'Missing values', 400
 
     # Create a new Transaction
-    #index = blockchain.new_transaction(values['sender'], values['recipient'], values['amount'])
-    index = blockchain.new_transaction(values['sender'], values['recipient'], values['amount'])
 
-    response = {'message': f'Transaction will be added to Block {str((session.query(Block.id).order_by(Block.id.desc()).first())[0]+1)}'}
+    blockchain.new_transaction('sender pidaras', random.randrange(0,10000,1), random.randrange(0,100000,1))
+    #blockchain.new_transaction(values['sender'], values['recipient'], values['amount'])
+
+    response = {'message': f'Transaction №{str((session.query(Transaction.id).order_by(Transaction.id.desc()).first())[0]+1)} will be added to Block {str((session.query(Block.id).order_by(Block.id.desc()).first())[0]+1)}'}
 
     session.add(
         Transaction(
             id=(session.query(Transaction.id).order_by(Transaction.id.desc()).first())[0]+1,
-            data=values['amount'],
+            #data=values['amount'],
+            data='hash is const because transaction data is const',
             transactionNo= (session.query(Transaction.id).order_by(Transaction.id.desc()).first())[0]+1,
-            hash=blockchain.hash(str(values['sender'])+str(values['recipient'])+ str(values['amount'])),
+            hash=blockchain.hash(str(values['sender'])+str(values['recipient'])+ str(values['amount'])+str((session.query(Transaction.id).order_by(Transaction.id.desc()).first())[0]+1)),
             prevHash='#####',#how to get prev hash?
             timestamp=currentTime,
             #proof=current_block['proof'],
